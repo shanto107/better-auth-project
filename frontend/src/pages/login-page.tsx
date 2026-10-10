@@ -1,4 +1,5 @@
 import EmailVerificationTab from "@/components/common/emai-verification-tab";
+import ForgotPasswordTab from "@/components/common/forgot-password-tab";
 import SignInTab from "@/components/common/sign-in-tab";
 import SignUpTab from "@/components/common/sign-up-tab";
 import SocialAuthButtons from "@/components/common/social-auth-buttons";
@@ -14,7 +15,7 @@ import { authClient } from "@/lib/auth-client";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
-type Tab = "signin" | "signup" | "email-verification";
+type Tab = "signin" | "signup" | "email-verification" | "forgot-password";
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -57,7 +58,10 @@ export default function LoginPage() {
             <CardTitle>Sign In</CardTitle>
           </CardHeader>
           <CardContent>
-            <SignInTab openEmailVerificationTab={openEmailVerificationTab} />
+            <SignInTab
+              openEmailVerificationTab={openEmailVerificationTab}
+              openForgotPassword={() => setSelectedTab("forgot-password")}
+            />
           </CardContent>
 
           <CardFooter>
@@ -72,7 +76,7 @@ export default function LoginPage() {
             <CardTitle>Sign Up</CardTitle>
           </CardHeader>
           <CardContent>
-            <SignUpTab openEmailVerificationTab={openEmailVerificationTab}/>
+            <SignUpTab openEmailVerificationTab={openEmailVerificationTab} />
           </CardContent>
 
           <CardFooter>
@@ -88,6 +92,17 @@ export default function LoginPage() {
           </CardHeader>
           <CardContent>
             <EmailVerificationTab email={email} />
+          </CardContent>
+        </Card>
+      </TabsContent>
+
+      <TabsContent value={"forgot-password"}>
+        <Card>
+          <CardHeader className="text-2xl font-bold">
+            <CardTitle>Forgot Password</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ForgotPasswordTab openSignInTab={() => setSelectedTab("signin")} />
           </CardContent>
         </Card>
       </TabsContent>
