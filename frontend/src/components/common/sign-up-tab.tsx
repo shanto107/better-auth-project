@@ -8,7 +8,7 @@ import { Button } from "../ui/button";
 import { LoadingSwap } from "../ui/loading-swap";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
-import { useNavigate } from "react-router";
+// import { useNavigate } from "react-router";
 
 const signUpSchema = z.object({
   name: z.string().min(1, { message: "Name is required" }),
@@ -20,8 +20,12 @@ const signUpSchema = z.object({
 
 type SignUpForm = z.infer<typeof signUpSchema>;
 
-export default function SignUpTab() {
-  const navigate = useNavigate();
+export default function SignUpTab({
+  openEmailVerificationTab
+}: {
+  openEmailVerificationTab: (email: string) => void
+}) {
+  // const navigate = useNavigate();
   const form = useForm<SignUpForm>({
     resolver: zodResolver(signUpSchema),
     defaultValues: {
@@ -32,18 +36,24 @@ export default function SignUpTab() {
   });
 
   async function handleSignUp(data: SignUpForm) {
-    await authClient.signUp.email({...data, callbackURL: "/"}, {
-      onError: (error) => {
-        toast.error(error.error.message || "An error occurred during sign up.");
+    const res = await authClient.signUp.email(
+      { ...data, callbackURL: "http://localhost:5173/" },
+      {
+        onError: (error) => {
+          toast.error(
+            error.error.message || "An error occurred during sign up.",
+          );
+        },
+        // onSuccess: () => {
+        //   navigate("/");
+        // },
       },
-      onSuccess: () => {
-        toast.success("Sign up successful! Please check your email to verify your account.");
-        navigate("/");
-      }
-    })
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate a delay
     // console.log("Form submitted:", data);
-
+    if (res.error === null && !res.data.user.emailVerified) {
+      openEmailVerificationTab(data.email);
+    }
   }
 
   return (
@@ -84,12 +94,12 @@ export default function SignUpTab() {
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <PasswordInput id="password" aria-invalid={!!fieldState.error} {...field} />
-              {
-                fieldState.error && (
-                  <FieldError errors={[fieldState.error]} />
-                )
-              }
+              <PasswordInput
+                id="password"
+                aria-invalid={!!fieldState.error}
+                {...field}
+              />
+              {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />

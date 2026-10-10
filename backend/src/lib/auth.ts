@@ -4,11 +4,16 @@ import { db } from "../drizzle/db.js"; // your drizzle instance
 import { sendPasswordResetEmail } from "./emails/send-password-reset-email.js";
 import { sendEmailVerificationEmail } from "./emails/send-email-verification-email.js";
 
+console.log("[Auth config] Loading email verification configuration");
 export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
+    onExistingUserSignUp: async ({ user }) => {
+      console.log("[Better Auth] Existing user signup attempt:", user.email);
+    },
     sendResetPassword: async ({ user, url }) => {
+      console.log("[Better Auth] Password reset callback:", user.email);
       await sendPasswordResetEmail({ user, url });
     },
   },
@@ -16,6 +21,7 @@ export const auth = betterAuth({
     autoSignInAfterVerification: true,
     sendOnSignUp: true,
     sendVerificationEmail: async ({ user, url }) => {
+      console.log("[Better Auth] Verification callback:", user.email);
       await sendEmailVerificationEmail({ user, url });
     },
   },

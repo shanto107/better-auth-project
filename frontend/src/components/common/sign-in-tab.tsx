@@ -19,7 +19,11 @@ const signInSchema = z.object({
 
 type SignInForm = z.infer<typeof signInSchema>;
 
-export default function SignInTab() {
+export default function SignInTab({
+  openEmailVerificationTab,
+}: {
+  openEmailVerificationTab: (email: string) => void;
+}) {
   const navigate = useNavigate();
 
   const form = useForm<SignInForm>({
@@ -31,15 +35,23 @@ export default function SignInTab() {
   });
 
   async function handleSignIn(data: SignInForm) {
-    await authClient.signIn.email({...data, callbackURL: "/"}, {
-      onError: (error) => {
-        toast.error(error.error.message || "An error occurred during sign in.");
+    await authClient.signIn.email(
+      { ...data, callbackURL: "/" },
+      {
+        onError: (error) => {
+          if (error.error.code === "EMAIL_NOT_VERIFIED") {
+            openEmailVerificationTab(data.email);
+          }
+          toast.error(
+            error.error.message || "An error occurred during sign in.",
+          );
+        },
+        onSuccess: () => {
+          toast.success("Sign in successful!");
+          navigate("/");
+        },
       },
-      onSuccess: () => {
-        toast.success("Sign in successful!");
-        navigate("/");
-      }
-    })
+    );
     await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulate a delay
     console.log("Form submitted:", data);
   }
@@ -47,7 +59,6 @@ export default function SignInTab() {
   return (
     <form onSubmit={form.handleSubmit(handleSignIn)} className="space-y-4">
       <FieldGroup>
-
         <Controller
           name="email"
           control={form.control}
@@ -71,12 +82,12 @@ export default function SignInTab() {
           render={({ field, fieldState }) => (
             <Field>
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <PasswordInput id="password" aria-invalid={!!fieldState.error} {...field} />
-              {
-                fieldState.error && (
-                  <FieldError errors={[fieldState.error]} />
-                )
-              }
+              <PasswordInput
+                id="password"
+                aria-invalid={!!fieldState.error}
+                {...field}
+              />
+              {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
         />
