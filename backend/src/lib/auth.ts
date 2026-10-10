@@ -3,6 +3,8 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "../drizzle/db.js"; // your drizzle instance
 import { sendPasswordResetEmail } from "./emails/send-password-reset-email.js";
 import { sendEmailVerificationEmail } from "./emails/send-email-verification-email.js";
+import { createAuthMiddleware } from "better-auth/api";
+import { sendWelcomeEmail } from "./emails/send-welcome-email.js";
 
 console.log("[Auth config] Loading email verification configuration");
 export const auth = betterAuth({
@@ -42,6 +44,23 @@ export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
   }),
+
+  hooks: {
+    after: createAuthMiddleware(async (ctx) => {
+      if (
+        ctx.path.startsWith("/sign-up") ||
+        ctx.path.startsWith("/verify-email")
+      ) {
+        const user = ctx.context.newSession?.user ?? {
+          name: ctx.body.name,
+          email: ctx.body.email,
+        };
+        if (user !== null) {
+          await sendWelcomeEmail(user);
+        }
+      }
+    }),
+  },
 
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: ["http://localhost:5173"],
