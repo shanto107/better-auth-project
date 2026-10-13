@@ -3,6 +3,7 @@ import LoginPage from "./pages/login-page";
 import { Toaster } from "./components/ui/sonner";
 import HomePage from "./pages/home-page";
 import ResetPasswordPage from "./pages/reset-password-page";
+import ProfilePage from "./pages/profile-page";
 
 function App() {
   return (
@@ -11,6 +12,7 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/auth/login" element={<LoginPage />} />
         <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/profile" element={<ProfilePage />} />
       </Routes>
 
       <Toaster position="top-center" />

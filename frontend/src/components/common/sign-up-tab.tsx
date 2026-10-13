@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { LoadingSwap } from "../ui/loading-swap";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "sonner";
+import { NumberInput } from "../ui/number-input";
 // import { useNavigate } from "react-router";
 
 const signUpSchema = z.object({
@@ -16,14 +17,15 @@ const signUpSchema = z.object({
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
+  favoriteNumber: z.number().int(),
 });
 
 type SignUpForm = z.infer<typeof signUpSchema>;
 
 export default function SignUpTab({
-  openEmailVerificationTab
+  openEmailVerificationTab,
 }: {
-  openEmailVerificationTab: (email: string) => void
+  openEmailVerificationTab: (email: string) => void;
 }) {
   // const navigate = useNavigate();
   const form = useForm<SignUpForm>({
@@ -99,6 +101,18 @@ export default function SignUpTab({
                 aria-invalid={!!fieldState.error}
                 {...field}
               />
+              {fieldState.error && <FieldError errors={[fieldState.error]} />}
+            </Field>
+          )}
+        />
+
+        <Controller
+          name="favoriteNumber"
+          control={form.control}
+          render={({ field, fieldState }) => (
+            <Field>
+              <FieldLabel htmlFor="favoriteNumber">ID Number</FieldLabel>
+              <NumberInput {...field} />
               {fieldState.error && <FieldError errors={[fieldState.error]} />}
             </Field>
           )}
