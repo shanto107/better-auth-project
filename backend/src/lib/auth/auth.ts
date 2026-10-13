@@ -1,13 +1,29 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { db } from "../drizzle/db.js"; // your drizzle instance
-import { sendPasswordResetEmail } from "./emails/send-password-reset-email.js";
-import { sendEmailVerificationEmail } from "./emails/send-email-verification-email.js";
+import { db } from "../../drizzle/db.js"; // your drizzle instance
+import { sendPasswordResetEmail } from "../emails/send-password-reset-email.js";
+import { sendEmailVerificationEmail } from "../emails/send-email-verification-email.js";
 import { createAuthMiddleware } from "better-auth/api";
-import { sendWelcomeEmail } from "./emails/send-welcome-email.js";
+import { sendWelcomeEmail } from "../emails/send-welcome-email.js";
 
-console.log("[Auth config] Loading email verification configuration");
 export const auth = betterAuth({
+  user: {
+    changeEmail: {
+      enabled: true,
+      sendChangeEmailConfirmation: async ({ user, url, newEmail }) => {
+        await sendEmailVerificationEmail({
+          user: { ...user, email: newEmail },
+          url,
+        });
+      },
+    },
+    additionalFields: {
+      favoriteNumber: {
+        type: "number",
+        required: true,
+      },
+    },
+  },
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -31,6 +47,11 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      mapProfileToUser: (profile) => {
+        return {
+          favoriteNumber: Number(profile.public_repos) || 0,
+        };
+      },
     },
   },
 
@@ -47,21 +68,22 @@ export const auth = betterAuth({
 
   hooks: {
     after: createAuthMiddleware(async (ctx) => {
-      if (
-        ctx.path.startsWith("/sign-up") ||
-        ctx.path.startsWith("/verify-email")
-      ) {
-        const user = ctx.context.newSession?.user ?? {
-          name: ctx.body.name,
-          email: ctx.body.email,
-        };
-        if (user !== null) {
-          await sendWelcomeEmail(user);
-        }
+      if (!ctx.path.startsWith("/verify-email")) {
+        return;
       }
+      const user = ctx.context.newSession?.user;
+      if (!user) {
+        console.warn(
+          "[Better Auth] No session user available after email verification.",
+        );
+        return;
+      }
+      await sendWelcomeEmail(user);
     }),
   },
 
   baseURL: process.env.BETTER_AUTH_URL,
   trustedOrigins: ["http://localhost:5173"],
 });
+
+export type Auth = typeof auth;
