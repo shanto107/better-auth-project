@@ -5,6 +5,7 @@ import { sendPasswordResetEmail } from "../emails/send-password-reset-email.js";
 import { sendEmailVerificationEmail } from "../emails/send-email-verification-email.js";
 import { createAuthMiddleware } from "better-auth/api";
 import { sendWelcomeEmail } from "../emails/send-welcome-email.js";
+import { sendDeleteAccountVerificationEmail } from "../emails/send-delete-account-verification-email.js";
 
 export const auth = betterAuth({
   user: {
@@ -15,6 +16,12 @@ export const auth = betterAuth({
           user: { ...user, email: newEmail },
           url,
         });
+      },
+    },
+    deleteUser: {
+      enabled: true,
+      sendDeleteAccountVerification: async ({ user, url }) => {
+        await sendDeleteAccountVerificationEmail({ user, url });
       },
     },
     additionalFields: {

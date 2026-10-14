@@ -1,8 +1,10 @@
+import AccountDeletion from "@/components/common/account-deletion";
+import LinkedAccountsTab from "@/components/common/linked-accounts-tab";
 import LoadingSuspense from "@/components/common/Loading-suspense";
 import ProfileUpdateForm from "@/components/common/profile-update-form";
 import SecurityTab from "@/components/common/security-tab";
 import SessionsTab from "@/components/common/sessions-tab";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
 import { ArrowLeft, Key, LinkIcon, Shield, Trash2, User } from "lucide-react";
@@ -100,6 +102,23 @@ export default function ProfilePage() {
           <LoadingSuspense>
             <SessionsTab currentSessionToken={session.session.token} />
           </LoadingSuspense>
+        </TabsContent>
+
+        <TabsContent value={"accounts"}>
+          <LoadingSuspense>
+            <LinkedAccountsTab />
+          </LoadingSuspense>
+        </TabsContent>
+
+        <TabsContent value={"danger"}>
+          <Card className="border border-destructive">
+            <CardHeader>
+              <CardTitle className="text-destructive">Danger Zone</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AccountDeletion />
+            </CardContent>
+          </Card>
         </TabsContent>
       </Tabs>
     </div>
