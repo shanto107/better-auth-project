@@ -25,7 +25,8 @@
     "drizzle-orm": "^0.45.3",
     "express": "^5.2.1",
     "pg": "^8.23.1",
-    "postmark": "^5.1.0"
+    "postmark": "^5.1.0",
+    "react-qr-code": "^2.2.0"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",

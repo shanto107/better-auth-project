@@ -9,12 +9,18 @@ import {
 } from "../ui/card";
 import { SetPasswordButton } from "./set-password-button";
 import ChangePasswordForm from "./change-password-form";
+import { Badge } from "../ui/badge";
+import TwoFactorAuthSection from "./two-factor-auth-section";
 
 type SecurityTabProps = {
   email: string;
+  isTwoFactorEnabled: boolean;
 };
 
-export default async function SecurityTab({ email }: SecurityTabProps) {
+export default async function SecurityTab({
+  email,
+  isTwoFactorEnabled,
+}: SecurityTabProps) {
   const [hasPasswordAccount, setHasPasswordAccount] = useState(false);
 
   useEffect(() => {
@@ -50,6 +56,19 @@ export default async function SecurityTab({ email }: SecurityTabProps) {
           </CardHeader>
           <CardContent>
             <SetPasswordButton email={email} />
+          </CardContent>
+        </Card>
+      )}
+      {hasPasswordAccount && (
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between gap-2">
+            <CardTitle>Two Factor Authentication</CardTitle>
+            <Badge variant={isTwoFactorEnabled ? "default" : "secondary"}>
+              {isTwoFactorEnabled ? "Enabled" : "Disabled"}
+            </Badge>
+          </CardHeader>
+          <CardContent>
+            <TwoFactorAuthSection isEnabled={isTwoFactorEnabled} />
           </CardContent>
         </Card>
       )}
