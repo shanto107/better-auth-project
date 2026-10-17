@@ -4,6 +4,7 @@ import LoadingSuspense from "@/components/common/Loading-suspense";
 import ProfileUpdateForm from "@/components/common/profile-update-form";
 import SecurityTab from "@/components/common/security-tab";
 import SessionsTab from "@/components/common/sessions-tab";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { authClient } from "@/lib/auth-client";
@@ -53,7 +54,7 @@ export default function ProfilePage() {
               <h1 className="text-3xl font-bold">
                 {session.user.name || "User Profile"}
               </h1>
-              {/* <Badge>{session.user.role}</Badge> */}
+              <Badge>{session.user.role}</Badge>
             </div>
             <p className="text-muted-foreground">{session.user.email}</p>
           </div>

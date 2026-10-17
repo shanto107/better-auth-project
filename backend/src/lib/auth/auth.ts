@@ -6,7 +6,7 @@ import { sendEmailVerificationEmail } from "../emails/send-email-verification-em
 import { createAuthMiddleware } from "better-auth/api";
 import { sendWelcomeEmail } from "../emails/send-welcome-email.js";
 import { sendDeleteAccountVerificationEmail } from "../emails/send-delete-account-verification-email.js";
-import { twoFactor } from "better-auth/plugins";
+import { admin, twoFactor } from "better-auth/plugins";
 
 export const auth = betterAuth({
   user: {
@@ -70,7 +70,7 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [twoFactor()],
+  plugins: [twoFactor(), admin()],
 
   database: drizzleAdapter(db, {
     provider: "pg",

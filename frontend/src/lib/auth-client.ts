@@ -1,5 +1,6 @@
 import { createAuthClient } from "better-auth/react";
 import {
+  adminClient,
   inferAdditionalFields,
   twoFactorClient,
 } from "better-auth/client/plugins";
@@ -14,5 +15,6 @@ export const authClient = createAuthClient({
         window.location.href = "http://localhost:5173/auth/2fa";
       },
     }),
+    adminClient(),
   ],
 });
