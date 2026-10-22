@@ -6,9 +6,19 @@ import { sendEmailVerificationEmail } from "../emails/send-email-verification-em
 import { createAuthMiddleware } from "better-auth/api";
 import { sendWelcomeEmail } from "../emails/send-welcome-email.js";
 import { sendDeleteAccountVerificationEmail } from "../emails/send-delete-account-verification-email.js";
-import { admin, twoFactor } from "better-auth/plugins";
+import {
+  admin as adminPlugin,
+  organization,
+  twoFactor,
+} from "better-auth/plugins";
+import { ac, user, admin } from "./permission.js";
+import { sendOrganizationInviteEmail } from "../emails/send-organization-invite-email.js";
+import { desc, eq } from "drizzle-orm";
+import { member } from "../../drizzle/schema.js";
 
 export const auth = betterAuth({
+  appName: "Auth Practice",
+
   user: {
     changeEmail: {
       enabled: true,
@@ -32,6 +42,7 @@ export const auth = betterAuth({
       },
     },
   },
+
   emailAndPassword: {
     enabled: true,
     requireEmailVerification: true,
@@ -43,6 +54,7 @@ export const auth = betterAuth({
       await sendPasswordResetEmail({ user, url });
     },
   },
+
   emailVerification: {
     autoSignInAfterVerification: true,
     sendOnSignUp: true,
@@ -51,6 +63,7 @@ export const auth = betterAuth({
       await sendEmailVerificationEmail({ user, url });
     },
   },
+
   socialProviders: {
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
@@ -70,7 +83,31 @@ export const auth = betterAuth({
     },
   },
 
-  plugins: [twoFactor(), admin()],
+  plugins: [
+    twoFactor(),
+    adminPlugin({
+      ac,
+      roles: {
+        admin,
+        user,
+      },
+    }),
+    organization({
+      sendInvitationEmail: async ({
+        email,
+        organization,
+        inviter,
+        invitation,
+      }) => {
+        await sendOrganizationInviteEmail({
+          invitation,
+          inviter: inviter.user,
+          organization,
+          email,
+        });
+      },
+    }),
+  ],
 
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -90,6 +127,26 @@ export const auth = betterAuth({
       }
       await sendWelcomeEmail(user);
     }),
+  },
+
+  databaseHooks: {
+    session: {
+      create: {
+        before: async (userSession) => {
+          const membership = await db.query.member.findFirst({
+            where: eq(member.userId, userSession.userId),
+            orderBy: desc(member.createdAt),
+            columns: { organizationId: true },
+          });
+          return {
+            data: {
+              ...userSession,
+              activeOrganizationId: membership?.organizationId,
+            },
+          };
+        },
+      },
+    },
   },
 
   baseURL: process.env.BETTER_AUTH_URL,

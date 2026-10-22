@@ -42,6 +42,12 @@ export default function HomePage() {
                 className={"rounded-sm"}
                 render={<Link to="/profile">Profile</Link>}
               />
+              <Button
+                size={"lg"}
+                className={"rounded-sm"}
+                variant={"outline"}
+                render={<Link to="/organizations">Organization</Link>}
+              />
               {hasAdminPermission && (
                 <Button
                   size={"lg"}

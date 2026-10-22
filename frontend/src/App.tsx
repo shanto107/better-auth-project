@@ -7,6 +7,8 @@ import ProfilePage from "./pages/profile-page";
 import TwoFactorPage from "./pages/two-factor-page";
 import AdminPage from "./pages/admin-page";
 import { ImpersonationIndicator } from "./components/common/impersonation-indicator";
+import OrganizationPage from "./pages/organization-page";
+import InvitePage from "./pages/invite-page";
 
 function App() {
   return (
@@ -18,6 +20,8 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/auth/2fa" element={<TwoFactorPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/organizations" element={<OrganizationPage />} />
+        <Route path="/organizations/invites/:id" element={<InvitePage />} />
       </Routes>
 
       <Toaster position="top-center" />
